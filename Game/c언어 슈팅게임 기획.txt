@@ -1,0 +1,217 @@
+플레이어 : 플레이어는 맵 중앙 하단에서 시작/부활
+플레이어 총알 : 총알은 맵을 넘어갔을 시 없어짐, 적에게 닿았을 경우 적 소멸
+적 : 적은 일정 주기로 중앙 위쪽 범위에서 랜덤 생성, 생성 후 1초 동안 무적, 1초 후 공격,
+ 플레이어 총알에 닿거나 맵 바닥에 닿을 경우 소멸(맵 바닥에 닿을 시 점수-1점) , 적은 소멸 전까지 위에서 아래로 이동
+적 총알 : 적의 생성 시점부터 1초 후 공격, 플레이어와 충돌 시 플레이어 목숨-1, 바닥에 닿았을 경우 소멸
+
+아이템 1. 총알 연사 속도 증가
+아이템2. 적 총알과 충돌 시 적 총알 소멸
+아이템3. 총알 범위 증가
+아이템4. 목숨 +1
+아이템5. 일시무적
+
+아이템은 적 처치시 랜덤으로 생성
+아이템은 생성된 시점 부터 아래로 내려오면서 맵 바닥에 닿을 경우 소멸
+목숨은 게임 시작 시 5개 가지고 시작
+점수는 적 처치 시 +1점
+적이 바닥에 닿았을 경우 -1점
+점수는 게임 진행 중 오른쪽 상단에 표시
+게임 종료 후 점수 종합
+게임 종료는 목숨 5개 사용 or 적 100마리 처치
+
+플레이어 : <<P>>
+플레이어 총알: ↑
+적: <<E>>
+적 총알: ↓
+아이템 : ★
+
+플레이어 조작법: 방향키, 공격(스페이스바)
+
+#define WIDTH 40
+#define HEIGHT 29
+#define EnemyMAX 10
+
+int ex[EnemyMAX] = { 0 };
+int	ey[EnemyMAX] = { 0 };
+bool enemy[EnemyMAX] = { FALSE };
+
+int x = 21, y = 29;
+int bx = 0, by = 0;
+bool bullet = FALSE;
+bool ebullet = FALSE;
+
+
+
+void GotoXY(int x,int y)
+{
+	COORD pos = { x,y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
+
+COORD GetXY()
+{
+	COORD pos;
+	CONSOLE_SCREEN_BUFFER_INFO curInfo;
+
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
+	pos.X = curInfo.dwCursorPosition.X;
+	pos.Y = curInfo.dwCursorPosition.Y;
+
+	return pos;
+
+}
+
+void Clear()
+{
+	system("cls");
+}
+
+void SetTitle(char* ConsoleName)
+{
+	SetConsoleTitle(ConsoleName);
+}
+
+void SetColor(unsigned char BgColor, unsigned char TextColor)
+{
+	if (BgColor > 15 || TextColor > 15) return;
+
+	unsigned short ColorNum = (BgColor << 4) | TextColor;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), ColorNum);
+}
+
+//void SetCursor()
+//{
+//	CONSOLE_CURSOR_INFO curInfo = {0, };
+//	curInfo.dwSize = 1;
+//	curInfo.bVisible = FALSE;
+//	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
+//}
+
+void Player()
+{
+	GotoXY(x, y);
+	printf("<p>");
+}
+
+void EnemySpawn()
+{
+	for (int i = 0; 1 < EnemyMAX; i++)
+	{
+		if (!enemy[i])
+		{
+			ex[i] = (rand() % 20) * 2;
+			ey[i] = 0;
+			enemy[i] = TRUE;
+			break;
+		}
+	}
+}
+
+void PlayerMove()
+{
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	{
+		x--;
+		if (x < 0) x = 0;
+	}
+
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	{
+		x++;
+		if (x > WIDTH) x = WIDTH;
+	}
+
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	{
+		y--;
+		if (y < 0) y = 0;
+	}
+	
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	{
+		y++;
+		if (y >HEIGHT ) y = HEIGHT;
+	}
+
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+	{
+		if (!bullet)
+		{
+			bx = x + 1;
+			by = y - 1;
+			bullet = TRUE;
+		}
+	}
+
+	if (bullet)
+	{
+		GotoXY(bx, by);
+		printf("↑");
+		by--;
+		if (by < 0) bullet = FALSE;
+	}
+}
+
+void EnemyMove()
+{
+	for (int i = 0; i < EnemyMAX; i++)
+	{
+		if (enemy[i])
+		{
+			GotoXY(ex[i], ey[i]);
+			printf("■");
+			ey[i]++;
+			ebullet = TRUE;
+			if (ex[i] == x && ey[i] == y)
+			{
+				enemy[i] = FALSE;
+			}
+			if (ey[i] > y)
+			{
+				enemy[i] = FALSE;
+			}
+		}
+
+		if (ebullet)
+		{
+			GotoXY(ex[i], ey[i] + 1);
+			printf("↓");
+			ey[i]++;
+			if (ex[i] == x && ey[i] == y)
+			{
+				ebullet = FALSE;
+			}
+			if (ey[i] > HEIGHT)
+			{
+				ebullet = FALSE;
+			}
+		}
+	}
+}
+
+int main()
+{
+	srand(time(NULL));
+
+	
+
+	while (1)
+	{
+		Clear();
+		
+		EnemySpawn();
+		PlayerMove();
+		EnemyMove();
+		Player();
+
+
+		
+
+	
+		Sleep(100);
+
+	}
+
+	system("pause");
+	return 0;
+}
