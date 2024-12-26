@@ -5,10 +5,10 @@
 #include <time.h>
 #include <stdbool.h>
 
-#define WIDTH 40
+#define WIDTH 35
 #define HEIGHT 29
-#define EnemyMAX 5
-#define PlayerX 21
+#define EnemyMAX 2
+#define PlayerX 19
 #define PlayerY 29
 #define Maxbullet 10
 
@@ -21,81 +21,8 @@ int bx[Maxbullet] = { 0 };
 int by[Maxbullet] = { 0 };
 bool bullet[Maxbullet] = { FALSE };
 
-
-
-//#pragma region buffer
-//
-//int screenIndex;
-//HANDLE screen[2];
-//
-//void Buffer()
-//{
-//	screen[0] = CreateConsoleScreenBuffer
-//	(
-//		GENERIC_READ | GENERIC_WRITE,
-//		0,
-//		NULL,
-//		CONSOLE_TEXTMODE_BUFFER,
-//		NULL
-//	);
-//
-//	screen[1] = CreateConsoleScreenBuffer
-//	(
-//		GENERIC_READ | GENERIC_WRITE,
-//		0,
-//		NULL,
-//		CONSOLE_TEXTMODE_BUFFER,
-//		NULL
-//	);
-//}
-// 
-// void Flip()
-//{
-//	SetConsoleActiveScreenBuffer(screen[screenIndex]);
-//
-//	screenIndex = !screenIndex;
-//
-//}
-//
-//void Clear()
-//{
-//	COORD position = { 0,0 };
-//
-//	DWORD dword;
-//
-//	CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-//
-//	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-//
-//	GetConsoleScreenBufferInfo(handle, &consoleInfo);
-//
-//	int width = consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1;
-//	int	height = consoleInfo.srWindow.Top - consoleInfo.srWindow.Bottom + 1;
-//
-//	FillConsoleOutputCharacter(screen[screenIndex], ' ', width * height, position, &dword);
-//}
-//
-//void Release()
-//{
-//	CloseHandle(screen[0]);
-//	CloseHandle(screen[1]);
-//}
-//
-//void Render(int x, int y, const char* shape)
-//{
-//	DWORD dword;
-//
-//	// x축과 y축을 설정
-//	COORD position = { x , y };
-//
-//	// 커서 위치를 이동하는 함수
-//	SetConsoleCursorPosition(screen[screenIndex], position);
-//
-//	WriteFile(screen[screenIndex], shape, strlen(shape), &dword, NULL);
-//}
-//
-//#pragma endregion
-
+int score = 0;
+int health = 5;
 
 void GotoXY(int x,int y)
 {
@@ -134,25 +61,25 @@ void SetColor(unsigned char BgColor, unsigned char TextColor)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), ColorNum);
 }
 
-//void SetCursor()
-//{
-//	CONSOLE_CURSOR_INFO curInfo = {0, };
-//	curInfo.dwSize = 1;
-//	curInfo.bVisible = FALSE;
-//	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
-//}
+void CursorView()
+{
+	CONSOLE_CURSOR_INFO curInfo = {0, };
+	curInfo.dwSize = 1;
+	curInfo.bVisible = FALSE;
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
+}
 
 void Player()
 {
 	GotoXY(x, y);
-	printf("<p>");
+	printf("●");
 }
 
 void EnemySpawn()
 {
 	for (int i = 0; i < EnemyMAX; i++)
 	{
-		if (!enemy[i])
+		if (enemy[i] == FALSE)
 		{
 			ex[i] = (rand() % 20) * 2;
 			ey[i] = 0;
@@ -192,9 +119,9 @@ void PlayerMove()
 	{
 		for (int i = 0; i < Maxbullet; i++)
 		{
-			if (!bullet[i])
+			if (bullet[i] == FALSE)
 			{
-				bx[i] = x + 1;
+				bx[i] = x ;
 				by[i] = y - 1;
 				bullet[i] = TRUE;
 				break;
@@ -205,7 +132,7 @@ void PlayerMove()
 
 	for (int i = 0; i < Maxbullet; i++)
 	{
-		if (bullet[i])
+		if (bullet[i] == TRUE)
 		{
 			GotoXY(bx[i], by[i]);
 			printf("↑");
@@ -213,7 +140,8 @@ void PlayerMove()
 
 			if (abs(ex[i] - bx[i]) <= 2 && ey[i] - by[i])
 			{
-
+				GotoXY(bx[i], by[i]);
+				printf(" ");
 				bullet[i] = FALSE;
 				break;
 			}
@@ -232,7 +160,8 @@ void EnemyMove()
 {
 	for (int i = 0; i < EnemyMAX; i++)
 	{
-		if (enemy[i])
+		
+		if (enemy[i] == TRUE)
 		{
 			GotoXY(ex[i], ey[i]);
 			printf("■");
@@ -240,27 +169,62 @@ void EnemyMove()
 				
 			if (abs(ex[i] - x) <=2 && ey[i] == y )
 			{
+				GotoXY(x, y);
+				printf(" ");
 				enemy[i] = FALSE;
+				health--;
+				break;
 			}
 
-			else if (abs(ex[i] - bx[i]) <= 2 && ey[i] - by[i])
+			else if (abs(ex[i] - bx[i]) <= 2 && ey[i] == by[i])
 			{
-				
+				GotoXY(bx[i], by[i]);
+				printf(" ");
 				enemy[i] = FALSE;
+				score++;
 				break;
 			}
 
 			else if (ey[i] > HEIGHT)
 			{
 				enemy[i] = FALSE;
+				score--;
 			}
 
 		}
 	}
 }
 
+void Score()
+{
+	GotoXY(0,0);
+	printf("점수 : %d", score);
+	if (score == 10)
+	{
+		system("cls");
+		printf("게임종료");
+		
+	}
+	if (score <= 0) score = 0;
+
+}
+
+void Health()
+{
+	GotoXY(29, 0);
+	printf("목숨 : %d", health);
+	if (health <= 0)
+	{
+		system("cls");
+		printf("게임종료");
+		
+	}
+}
+
 int main()
 {
+	CursorView();
+	system("mode con cols=38 lines=30");
  	srand(time(NULL));
 	SetTitle("Shooting game");
 
@@ -273,8 +237,8 @@ int main()
 		PlayerMove();
 		EnemyMove();
 		Player();
-
-
+		Health();
+		Score();
 		
 
 	
