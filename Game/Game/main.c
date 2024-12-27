@@ -10,7 +10,8 @@
 #define EnemyMAX 2
 #define PlayerX 19
 #define PlayerY 29
-#define Maxbullet 10
+#define Maxbullet 5
+
 
 int ex[EnemyMAX] = { 0 };
 int	ey[EnemyMAX] = { 0 };
@@ -81,41 +82,41 @@ void EnemySpawn()
 	{
 		if (enemy[i] == FALSE)
 		{
-			ex[i] = (rand() % 20) * 2;
+			ex[i] = (rand() % 20) * 2 ;
 			ey[i] = 0;
 			enemy[i] = TRUE;
-			break;
+			return;
 		}
 	}
 }
 
 void PlayerMove()
 {
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	if (GetAsyncKeyState(VK_LEFT) )
 	{
 		x--;
 		if (x < 0) x = 0;
 	}
                 
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	if (GetAsyncKeyState(VK_RIGHT) )
 	{
 		x++;
 		if (x > WIDTH) x = WIDTH;
 	}
 
-	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	if (GetAsyncKeyState(VK_UP) )
 	{
 		y--;
 		if (y < 0) y = 0;
 	}
 	
-	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	if (GetAsyncKeyState(VK_DOWN) )
 	{
 		y++;
 		if (y > HEIGHT ) y = HEIGHT;
 	}
 
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+	if (GetAsyncKeyState(VK_SPACE) )
 	{
 		for (int i = 0; i < Maxbullet; i++)
 		{
@@ -124,12 +125,15 @@ void PlayerMove()
 				bx[i] = x ;
 				by[i] = y - 1;
 				bullet[i] = TRUE;
-				break;
+				
 			}
 
 		}
 	}
+}
 
+void CreatBullet()
+{
 	for (int i = 0; i < Maxbullet; i++)
 	{
 		if (bullet[i] == TRUE)
@@ -137,21 +141,6 @@ void PlayerMove()
 			GotoXY(bx[i], by[i]);
 			printf("↑");
 			by[i]--;
-
-			if (abs(ex[i] - bx[i]) <= 2 && ey[i] - by[i])
-			{
-				GotoXY(bx[i], by[i]);
-				printf(" ");
-				bullet[i] = FALSE;
-				break;
-			}
-
-			if (by[i] < 0)
-			{
-				bullet[i] = FALSE; 
-			}
-
-				
 		}
 	}
 }
@@ -167,32 +156,64 @@ void EnemyMove()
 			printf("■");
 			ey[i]++;
 				
-			if (abs(ex[i] - x) <=2 && ey[i] == y )
-			{
-				GotoXY(x, y);
-				printf(" ");
-				enemy[i] = FALSE;
-				health--;
-				break;
-			}
-
-			else if (abs(ex[i] - bx[i]) <= 2 && ey[i] == by[i])
-			{
-				GotoXY(bx[i], by[i]);
-				printf(" ");
-				enemy[i] = FALSE;
-				score++;
-				break;
-			}
-
-			else if (ey[i] > HEIGHT)
-			{
-				enemy[i] = FALSE;
-				score--;
-			}
-
 		}
 	}
+
+}
+
+void Hit()
+{
+	// 총알 충돌 판정
+	for (int i = 0; i < Maxbullet; i++)
+	{
+	
+		if (bullet[i] == FALSE)
+			continue;
+		if (abs(ex[i] - bx[i]) <= 2 && ey[i] == by[i])
+		{
+			GotoXY(bx[i], by[i]);
+			printf(" ");
+			bullet[i] = FALSE;
+		}
+		else if (by[i] < 0)
+		{
+			GotoXY(bx[i], by[i]);
+			printf(" ");
+			bullet[i] = FALSE;
+		}
+	}
+
+	// 적 충돌 판정
+	for (int i = 0; i < EnemyMAX; i++)
+	{
+		if (enemy[i] == FALSE)
+			continue;
+		if (abs(ex[i] - x) <= 2 && ey[i] == y)
+		{
+			GotoXY(ex[i], ey[i]);
+			printf(" ");
+			enemy[i] = FALSE;
+			health--;
+
+		}
+		else if (abs(ex[i] - bx[i]) <= 2 && ey[i] == by[i])
+		{
+			GotoXY(ex[i], ey[i]);
+			printf(" ");
+			enemy[i] = FALSE;
+			score++;
+		}
+		else if (ey[i] > HEIGHT)
+		{
+			GotoXY(ex[i], ey[i]);
+			printf(" ");
+			enemy[i] = FALSE;
+			score--;
+		}
+
+
+	}
+
 }
 
 void Score()
@@ -202,7 +223,9 @@ void Score()
 	if (score == 10)
 	{
 		system("cls");
+		GotoXY(20, 15);
 		printf("게임종료");
+
 		
 	}
 	if (score <= 0) score = 0;
@@ -216,6 +239,7 @@ void Health()
 	if (health <= 0)
 	{
 		system("cls");
+		GotoXY(20, 15);
 		printf("게임종료");
 		
 	}
@@ -223,6 +247,7 @@ void Health()
 
 int main()
 {
+	Clear();
 	CursorView();
 	system("mode con cols=38 lines=30");
  	srand(time(NULL));
@@ -232,13 +257,19 @@ int main()
 	{
 		
 		Clear();
-		
-		EnemySpawn();
-		PlayerMove();
-		EnemyMove();
+
 		Player();
-		Health();
-		Score();
+		PlayerMove();
+		CreatBullet();
+		// 
+		// EnemySpawn();
+		// EnemyMove();
+		// 
+		// Hit();
+		// 
+		// Health();
+		// Score();
+		
 		
 
 	
