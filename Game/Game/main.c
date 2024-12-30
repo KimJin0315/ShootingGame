@@ -16,6 +16,7 @@
 int ex[EnemyMAX] = { 0 };
 int	ey[EnemyMAX] = { 0 };
 bool enemy[EnemyMAX] = { FALSE };
+int enemynum = EnemyMAX;
 
 int x = PlayerX, y = PlayerY;
 int bx[Maxbullet] = { 0 };
@@ -24,6 +25,7 @@ bool bullet[Maxbullet] = { FALSE };
 
 int score = 0;
 int health = 5;
+int item = 0;
 
 void GotoXY(int x,int y)
 {
@@ -82,10 +84,9 @@ void EnemySpawn()
 	{
 		if (enemy[i] == FALSE)
 		{
-			ex[i] = (rand() % 20) * 2 ;
+			ex[i] = 7+ (rand() % 10) * 2;
 			ey[i] = 0;
 			enemy[i] = TRUE;
-			return;
 		}
 	}
 }
@@ -94,46 +95,45 @@ void PlayerMove()
 {
 	if (GetAsyncKeyState(VK_LEFT) )
 	{
-		x--;
+		x -= 1;
 		if (x < 0) x = 0;
 	}
                 
-	if (GetAsyncKeyState(VK_RIGHT) )
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
 	{
-		x++;
+		x += 1;
 		if (x > WIDTH) x = WIDTH;
 	}
 
-	if (GetAsyncKeyState(VK_UP) )
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
 	{
-		y--;
+		y -= 1;
 		if (y < 0) y = 0;
 	}
 	
-	if (GetAsyncKeyState(VK_DOWN) )
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
 	{
-		y++;
+		y += 1;
 		if (y > HEIGHT ) y = HEIGHT;
 	}
+	
+}
 
-	if (GetAsyncKeyState(VK_SPACE) )
+void CreatBullet()
+{
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
 	{
 		for (int i = 0; i < Maxbullet; i++)
 		{
 			if (bullet[i] == FALSE)
 			{
-				bx[i] = x ;
+				bx[i] = x;
 				by[i] = y - 1;
 				bullet[i] = TRUE;
-				
+				break;
 			}
-
 		}
 	}
-}
-
-void CreatBullet()
-{
 	for (int i = 0; i < Maxbullet; i++)
 	{
 		if (bullet[i] == TRUE)
@@ -143,13 +143,16 @@ void CreatBullet()
 			by[i]--;
 		}
 	}
+
 }
 
 void EnemyMove()
 {
 	for (int i = 0; i < EnemyMAX; i++)
 	{
-		
+		if (enemy[i] == FALSE)
+			continue;
+
 		if (enemy[i] == TRUE)
 		{
 			GotoXY(ex[i], ey[i]);
@@ -166,54 +169,66 @@ void Hit()
 	// 총알 충돌 판정
 	for (int i = 0; i < Maxbullet; i++)
 	{
-	
-		if (bullet[i] == FALSE)
-			continue;
-		if (abs(ex[i] - bx[i]) <= 2 && ey[i] == by[i])
+		if (bullet[i] == TRUE)
 		{
-			GotoXY(bx[i], by[i]);
-			printf(" ");
-			bullet[i] = FALSE;
-		}
-		else if (by[i] < 0)
-		{
-			GotoXY(bx[i], by[i]);
-			printf(" ");
-			bullet[i] = FALSE;
+			for (int j = 0; j < EnemyMAX; j++)
+			{
+				if (enemy[j] == TRUE)
+				{
+					if (abs(bx[i] - ex[j]) <= 2 && by[i] == ey[j])
+					{
+						// 총알과 적이 충돌한 경우
+						GotoXY(bx[i], by[i]);
+						printf(" ");
+						bullet[i] = FALSE;
+
+						GotoXY(ex[j], ey[j]);
+						printf(" ");
+						enemy[j] = FALSE;
+
+						score++;
+
+						item = rand() % 15 + 1;
+						break; // 충돌 시 반복문 종료
+					}
+				}
+			}
+
+			if (bullet[i] == TRUE && by[i] < 0)
+			{
+				// 총알이 화면을 벗어난 경우
+				GotoXY(bx[i], by[i]);
+				printf(" ");
+				bullet[i] = FALSE;
+			}
 		}
 	}
 
-	// 적 충돌 판정
+	// 적과 플레이어의 충돌 판정
 	for (int i = 0; i < EnemyMAX; i++)
 	{
-		if (enemy[i] == FALSE)
-			continue;
-		if (abs(ex[i] - x) <= 2 && ey[i] == y)
+		if (enemy[i] == TRUE)
 		{
-			GotoXY(ex[i], ey[i]);
-			printf(" ");
-			enemy[i] = FALSE;
-			health--;
+			if (abs(ex[i] - x) <= 1 && ey[i] == y)
+			{
+				// 적이 플레이어와 충돌한 경우
+				GotoXY(ex[i], ey[i]);
+				printf(" ");
+				enemy[i] = FALSE;
 
-		}
-		else if (abs(ex[i] - bx[i]) <= 2 && ey[i] == by[i])
-		{
-			GotoXY(ex[i], ey[i]);
-			printf(" ");
-			enemy[i] = FALSE;
-			score++;
-		}
-		else if (ey[i] > HEIGHT)
-		{
-			GotoXY(ex[i], ey[i]);
-			printf(" ");
-			enemy[i] = FALSE;
-			score--;
-		}
+				health--;
+			}
+			else if (ey[i] > HEIGHT)
+			{
+				// 적이 화면을 벗어난 경우
+				GotoXY(ex[i], ey[i]);
+				printf(" ");
+				enemy[i] = FALSE;
 
-
+				score--;
+			}
+		}
 	}
-
 }
 
 void Score()
@@ -245,9 +260,28 @@ void Health()
 	}
 }
 
+void Item()
+{
+
+	switch (item)
+	{
+		case 1:
+		break;
+
+		case 3: 
+		break;
+
+		case 5: 
+		break;
+
+		case 7: 
+		break;
+	}
+}
+
 int main()
 {
-	Clear();
+	
 	CursorView();
 	system("mode con cols=38 lines=30");
  	srand(time(NULL));
@@ -255,29 +289,31 @@ int main()
 
 	while (1)
 	{
-		
 		Clear();
 
+		SetColor(15, 10);
 		Player();
 		PlayerMove();
 		CreatBullet();
-		// 
-		// EnemySpawn();
-		// EnemyMove();
-		// 
-		// Hit();
-		// 
-		// Health();
-		// Score();
+		
+		SetColor(15, 5);
+		EnemySpawn();
+		EnemyMove();
+		
+		Hit();
+
+		SetColor(15, 0);
+		Health();
+		Score();
 		
 		
 
 	
-		Sleep(100);
+		Sleep(75);
 		
 	}
 
 
-	system("pause");
+
 	return 0;
 }
