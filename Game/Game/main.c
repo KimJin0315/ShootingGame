@@ -7,10 +7,12 @@
 
 #define WIDTH 35
 #define HEIGHT 29
-#define EnemyMAX 2
+#define EnemyMAX 1
 #define PlayerX 19
 #define PlayerY 29
 #define Maxbullet 5
+#define Maxitem 1
+#define Itembullet 10
 
 
 int ex[EnemyMAX] = { 0 };
@@ -25,7 +27,25 @@ bool bullet[Maxbullet] = { FALSE };
 
 int score = 0;
 int health = 5;
-int item = 0;
+
+int itemb = 0;
+int itemc = 15;
+int items = 10;
+int ix[Maxitem] = { 0 };
+int iy[Maxitem] = { 0 };
+bool item[Maxitem] = { FALSE };
+
+enum Item
+{
+	Mbullet = 3,
+
+	Drange = 5,
+
+	Speedup = 7,
+
+	Healthup = 9
+
+};
 
 void GotoXY(int x,int y)
 {
@@ -76,6 +96,7 @@ void Player()
 {
 	GotoXY(x, y);
 	printf("●");
+
 }
 
 void EnemySpawn()
@@ -186,9 +207,8 @@ void Hit()
 						printf(" ");
 						enemy[j] = FALSE;
 
-						score++;
-
-						item = rand() % 15 + 1;
+						score += 10;
+						
 						break; // 충돌 시 반복문 종료
 					}
 				}
@@ -229,6 +249,33 @@ void Hit()
 			}
 		}
 	}
+
+	// 아이템과 플레이어의 충돌 판정
+	for (int i = 0; i < Maxitem; i++)
+	{
+		if (item[i] == TRUE)
+		{
+			if (abs(ix[i] - x) <= 1 && iy[i] == y)
+			{
+				// 아이템이 플레이어와 충돌한 경우
+				GotoXY(ix[i], iy[i]);
+				printf("  ");
+				item[i] = FALSE;
+
+				itemb = rand() % 10 + 1;
+
+
+			}
+			else if (iy[i] > HEIGHT)
+			{
+				// 아이템이 화면을 벗어난 경우
+				GotoXY(ix[i],iy[i]);
+				printf("  ");
+				item[i] = FALSE;
+			}
+			
+		}
+	}
 }
 
 void Score()
@@ -254,30 +301,141 @@ void Health()
 	if (health <= 0)
 	{
 		system("cls");
-		GotoXY(20, 15);
+		GotoXY(25, 15);
 		printf("게임종료");
 		
+	}
+}
+
+void ItemSpawn()
+{
+	for (int i = 0; i < Maxitem; i++)
+	{
+		if (item[i] == FALSE)
+		{
+			ix[i] =rand() % 37 + 1;
+			iy[i] = rand() % 30 + 10;
+			item[i] = TRUE;
+		}
+	}
+}
+
+void ItemMove()
+{
+	for (int i = 0; i < Maxitem; i++)
+	{
+		if (item[i] == FALSE)
+			continue;
+
+		if (item[i] == TRUE)
+		{
+			GotoXY(ix[i], iy[i]);
+			printf("★");
+			
+		}
 	}
 }
 
 void Item()
 {
 
-	switch (item)
+
+	switch(itemb)
 	{
-		case 1:
-		break;
+		case Mbullet:	// 최대 총알 수 증가
+		
+			
 
-		case 3: 
-		break;
+			while (itemc == 0)
+			{
+				if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+				{
+					for (int i = 0; i < itemc; i++)
+					{
+						if (bullet[i] == FALSE)
+						{
+							bx[i] = x;
+							by[i] = y - 1;
+							bullet[i] = TRUE;
+							break;
+						}
+					}
+				}
+				for (int i = 0; i < itemc; i++)
+				{
+					if (bullet[i] == TRUE)
+					{
+						GotoXY(bx[i], by[i]);
+						SetColor(15,10);
+						printf("↑");
+						by[i]--;
+					}
+				}
+				
+				itemc--;
+			}
 
-		case 5: 
-		break;
+			itemb = 0;
+			break;
 
-		case 7: 
-		break;
+		case Drange: // 공격 범위 증가
+			
+
+			itemb = 0;
+			break;
+
+		case Speedup: // 이동범위 증가
+			
+			while (items == 0)
+			{
+	
+				if (GetAsyncKeyState(VK_LEFT))
+				{
+					x -= 3;
+					if (x < 0) x = 0;
+				}
+
+				if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+				{
+					x += 3;
+					if (x > WIDTH) x = WIDTH;
+				}
+
+				if (GetAsyncKeyState(VK_UP) & 0x8000)
+				{
+					y -= 3;
+					if (y < 0) y = 0;
+				}
+
+				if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+				{
+					y += 3;
+					if (y > HEIGHT) y = HEIGHT;
+				}
+
+				items--;
+			}
+			itemb = 0;
+			break;
+
+		case Healthup: // 목숨 +1
+	
+			health += 1;
+			itemb = 0;
+			break;
+
 	}
+		
+	
+	
 }
+
+void Itemshow()
+{
+	GotoXY(0, 29);
+	printf("아이템 : %d", itemb);
+}
+
 
 int main()
 {
@@ -299,7 +457,12 @@ int main()
 		SetColor(15, 5);
 		EnemySpawn();
 		EnemyMove();
-		
+
+		ItemSpawn();
+		ItemMove();
+		Item();
+		Itemshow();
+
 		Hit();
 
 		SetColor(15, 0);
