@@ -1,10 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\user\\Desktop\\\uD504\uB85C\uADF8\uB798\uBC0D\\Game\\",
+  "WorkspaceRootPath": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{004731D6-0538-4D47-8673-A082BD4B53D4}|Game\\Game.vcxproj|C:\\Users\\user\\Desktop\\\uD504\uB85C\uADF8\uB798\uBC0D\\Game\\Game\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{004731D6-0538-4D47-8673-A082BD4B53D4}|Game\\Game.vcxproj|solutionrelative:Game\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|solutionrelative:ShootingGame\\2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\Source.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|solutionrelative:ShootingGame\\Source.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,19 +18,33 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "main.c",
-              "DocumentMoniker": "C:\\Users\\user\\Desktop\\\uD504\uB85C\uADF8\uB798\uBC0D\\Game\\Game\\main.c",
-              "RelativeDocumentMoniker": "Game\\main.c",
-              "ToolTip": "C:\\Users\\user\\Desktop\\\uD504\uB85C\uADF8\uB798\uBC0D\\Game\\Game\\main.c",
-              "RelativeToolTip": "Game\\main.c",
-              "ViewState": "AgIAANEAAAAAAAAAAAAAANsAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "Source.c",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\Source.c",
+              "RelativeDocumentMoniker": "ShootingGame\\Source.c",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\Source.c",
+              "RelativeToolTip": "ShootingGame\\Source.c",
+              "ViewState": "AgIAAM0BAAAAAAAAAAAiwOwBAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2024-12-23T06:21:28.42Z",
+              "WhenOpened": "2025-01-04T12:15:43.879Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "2.c",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c",
+              "RelativeDocumentMoniker": "ShootingGame\\2.c",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c",
+              "RelativeToolTip": "ShootingGame\\2.c",
+              "ViewState": "AgIAADEBAAAAAAAAAAAqwF0BAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-01-04T12:37:18.827Z",
               "IsPinned": true,
               "EditorCaption": ""
             }
