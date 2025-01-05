@@ -1,3 +1,5 @@
+#pragma region 헤더파일
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -5,27 +7,38 @@
 #include <time.h>
 #include <stdbool.h>
 
+#pragma endregion
+
+#pragma region 정의
+
 #define WIDTH 35
 #define HEIGHT 29
-#define EnemyMAX 1
+#define EnemyMAX 5
 #define PlayerX 19
 #define PlayerY 29
 #define Maxbullet 5
 #define Maxitem 2
-#define Itembullet 10
+#define MaxbulletDoubleShot 20 // 더블샷 활성화 시 최대 총알 수
+#define MaxbulletMbullet 10  // Mbullet 아이템 활성화 시 최대 총알 수
+
+#pragma endregion
+
+#pragma region 전역변수
 
 int ex[EnemyMAX] = { 0 };
 int ey[EnemyMAX] = { 0 };
 bool enemy[EnemyMAX] = { FALSE };
 int enemynum = EnemyMAX;
 
-int x = PlayerX, y = PlayerY;
-int bx[Maxbullet] = { 0 };
-int by[Maxbullet] = { 0 };
-bool bullet[Maxbullet] = { FALSE };
+int x = PlayerX, y = PlayerY; // 플레이어 시작 좌표
 
+// 점수, 목숨
 int score = 0;
 int health = 5;
+
+#pragma endregion
+
+#pragma region 아이템
 
 int itemb = 0;
 
@@ -34,18 +47,38 @@ int iy[Maxitem] = { 0 };
 bool item[Maxitem] = { FALSE };
 
 int bulletCount = Maxbullet; // 총알 수
-bool speedUpActive = false;  // Speedup 아이템 활성화 여부
+
+int maxBulletTemp = Maxbullet;  // 일시적으로 총알 수를 늘리기 위한 변수
+clock_t MbulletStartTime = 0;  // Mbullet 아이템 활성화 시작 시간
+bool MbulletActive = FALSE;  // Mbullet 아이템 활성화 여부
+
+int bx[MaxbulletDoubleShot] = { 0 };
+int by[MaxbulletDoubleShot] = { 0 };
+bool bullet[MaxbulletDoubleShot] = { FALSE };
+
+bool doubleShotActive = FALSE; // doubleShot 아이템 활성화 여부
+int doubleShotStage = 0; // 현재 발사 단계 (0: 중앙, 1: 왼쪽, 2: 오른쪽)
+clock_t lastShotTime = 0;      // 마지막 총알 발사 시간
+
+unsigned long doubleShotStartTime = 0; // 더블샷 아이템을 활성화한 시간
+unsigned long doubleShotDuration = 5000; // 더블샷 효과 시간 (5초)
+
 int speedUpDuration = 0;     // Speedup 아이템 지속 시간
-bool tripleShotActive = false; // TripleShot 아이템 활성화 여부
+bool speedUpActive = FALSE;  // Speedup 아이템 활성화 여부
+clock_t speedUpStartTime = 0;    // Speedup 아이템 효과 시작 시간
+const int SPEEDUP_DURATION_MS = 5000;  // 5초 (10000ms)
 
 enum Item
 {
 	Mbullet = 1,
-	Drange = 2,
+	DoubleShot = 2,
 	Speedup = 3,
-	Healthup = 4,
-	TripleShot = 5 // 새로운 아이템 추가
+	Healthup = 4
 };
+
+#pragma endregion
+
+#pragma region 게임시스템함수
 
 void GotoXY(int x, int y)
 {
@@ -100,7 +133,7 @@ void EnemySpawn()
 
 void PlayerMove()
 {
-	int moveSpeed = speedUpActive ? 3 : 1;
+	int moveSpeed = speedUpActive ? 2 : 1;
 
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
@@ -129,34 +162,34 @@ void PlayerMove()
 
 void CreateBullet()
 {
+	int maxBullet = doubleShotActive ? MaxbulletDoubleShot : maxBulletTemp; // 현재 최대 총알 수 결정
+
+	// 스페이스바 입력 확인
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
 	{
-		if (tripleShotActive)
+		if (doubleShotActive) // 두 줄 총알 활성화 상태
 		{
-			// 3개의 총알을 발사 (왼쪽, 중앙, 오른쪽)
-			for (int i = 0; i < bulletCount; i++)
+			for (int i = 0; i < maxBullet - 1; i++) // 두 줄 발사를 위해 두 칸 여유 확인
 			{
-				if (bullet[i] == FALSE)
+				if (bullet[i] == FALSE && bullet[i + 1] == FALSE)
 				{
-					bx[i] = x - 1;  // 왼쪽 총알
+					// 왼쪽 총알
+					bx[i] = x - 1; // 플레이어 기준 왼쪽으로 1칸
 					by[i] = y - 1;
 					bullet[i] = TRUE;
 
-					bx[i + 1] = x;  // 중앙 총알
+					// 오른쪽 총알
+					bx[i + 1] = x + 1; // 플레이어 기준 오른쪽으로 1칸
 					by[i + 1] = y - 1;
 					bullet[i + 1] = TRUE;
 
-					bx[i + 2] = x + 1;  // 오른쪽 총알
-					by[i + 2] = y - 1;
-					bullet[i + 2] = TRUE;
-
-					break;
+					break; // 2개의 총알을 한 번에 생성했으므로 반복문 종료
 				}
 			}
 		}
-		else
+		else // 일반 총알 발사
 		{
-			for (int i = 0; i < bulletCount; i++)
+			for (int i = 0; i < maxBullet; i++)
 			{
 				if (bullet[i] == FALSE)
 				{
@@ -169,14 +202,24 @@ void CreateBullet()
 		}
 	}
 
-	// 총알 이동
-	for (int i = 0; i < bulletCount; i++)
+	// 기존 총알 이동 처리
+	for (int i = 0; i < maxBullet; i++)
 	{
 		if (bullet[i] == TRUE)
 		{
 			GotoXY(bx[i], by[i]);
-			printf("↑");
-			by[i]--;
+			printf(" ");            // 이전 위치 지우기
+			by[i]--;                // 총알 이동
+
+			if (by[i] < 0)          // 화면 밖으로 나간 경우 비활성화
+			{
+				bullet[i] = FALSE;
+			}
+			else
+			{
+				GotoXY(bx[i], by[i]);
+				printf("↑");        // 새 위치에 총알 표시
+			}
 		}
 	}
 }
@@ -257,7 +300,7 @@ void Hit()
 			printf("  ");
 			item[i] = FALSE;
 
-			itemb = (rand() % 5) + 1;  // 새로운 아이템 추가
+			itemb = (rand() % 4) + 1;  // 새로운 아이템 추가
 		}
 		else if (iy[i] > HEIGHT)
 		{
@@ -272,10 +315,10 @@ void Score()
 {
 	GotoXY(0, 0);
 	printf("점수 : %d", score);
-	if (score == 300)
+	if (score >= 300)
 	{
 		system("cls");
-		GotoXY(20, 15);
+		GotoXY(15, 15);
 		printf("게임종료");
 	}
 	if (score <= 0) score = 0;
@@ -288,9 +331,15 @@ void Health()
 	if (health <= 0)
 	{
 		system("cls");
-		GotoXY(25, 15);
+		GotoXY(15, 15);
 		printf("게임종료");
 	}
+}
+
+void BulletCountDisplay()
+{
+	GotoXY(0, 1);  // 총알 수가 화면의 상단 왼쪽에 출력되도록 위치 설정
+	printf("최대 총알 수 : %d", bulletCount);  // 현재 최대 총알 수 출력
 }
 
 void ItemSpawn()
@@ -323,65 +372,106 @@ void Item()
 	switch (itemb)
 	{
 	case Mbullet:  // 총알 수 증가
-		bulletCount++;
+		if (!MbulletActive)  // 이미 활성화된 상태에서 다시 호출되지 않도록
+		{
+			MbulletActive = TRUE;
+			maxBulletTemp = MaxbulletMbullet;  // 최대 총알 수를 늘림
+			MbulletStartTime = clock();  // 활성화 시작 시간 저장
+		}
+		itemb = 0;
+		break;
+
+	case DoubleShot:  // 3줄 공격 활성화
+		if (!doubleShotActive)  // 이미 활성화된 상태에서 다시 호출하지 않도록
+		{
+			doubleShotActive = true;
+			doubleShotStartTime = GetTickCount64(); // 활성화 시작 시간 저장
+
+			// 이전에 발사된 총알이 있으면 모두 비활성화
+			for (int i = 0; i < MaxbulletDoubleShot; i++)
+			{
+				bullet[i] = FALSE; // 이전 총알 비활성화
+			}
+		}
+		itemb = 0;
 		break;
 
 	case Speedup:  // 이동 속도 증가
 		speedUpActive = true;
-		speedUpDuration = 200;  // 200번의 게임 루프 동안 효과 지속
+		speedUpStartTime = clock();  // 현재 시간 저장
+		itemb = 0;
 		break;
 
 	case Healthup:  // 체력 증가
 		health++;
+		itemb = 0;
 		break;
+	}
 
-	case TripleShot:  // 3줄 공격 활성화
-		tripleShotActive = true;
-		break;
+
+}
+
+void CheckMbulletDuration()
+{
+	if (MbulletActive)
+	{
+		clock_t currentTime = clock();
+		if ((currentTime - MbulletStartTime) * 1000 / CLOCKS_PER_SEC >= 5000)  // 5초 경과 후 비활성화
+		{
+			MbulletActive = FALSE;
+			maxBulletTemp = Maxbullet;  // 총알 수를 원래대로 복원
+		}
 	}
 }
 
-void Itemshow()
+void ApplyDoubleShotItem()
 {
-	GotoXY(13, 0);
-	printf("아이템 : %d", itemb);
+	doubleShotActive = TRUE; // 더블샷 효과 활성화
+	doubleShotStartTime = GetTickCount64(); // 현재 시간 기록
 }
 
-void ResetGame()
+void CheckDoubleShot()
 {
-	x = PlayerX;
-	y = PlayerY;
-	health = 5;
-	score = 0;
-	bulletCount = Maxbullet;
-	speedUpActive = false;
-	speedUpDuration = 0;
-	tripleShotActive = false;  // TripleShot 아이템 비활성화
-	for (int i = 0; i < Maxbullet; i++) bullet[i] = false;
-	for (int i = 0; i < EnemyMAX; i++) enemy[i] = false;
-	for (int i = 0; i < Maxitem; i++) item[i] = false;
+	if (doubleShotActive)
+	{
+		if (GetTickCount64() - doubleShotStartTime >= doubleShotDuration)
+		{
+			doubleShotActive = FALSE; // 10초 후 더블샷 비활성화
+		}
+	}
 }
 
-int main()
+void CheckSpeedupDuration()
+{
+	if (speedUpActive)
+	{
+		clock_t currentTime = clock();
+		if ((currentTime - speedUpStartTime) * 1000 / CLOCKS_PER_SEC >= SPEEDUP_DURATION_MS)
+		{
+			// 10초(10000ms)가 경과한 경우 비활성화
+			speedUpActive = false;
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region 게임시작함수
+
+void GameStart()
 {
 	CursorView();
-	system("mode con cols=38 lines=30");
+
 	srand(time(NULL));
-	SetTitle("Shooting game");
+	SetTitle(TEXT("Shooting game"));
 
 	while (1)
 	{
 		Clear();
 
-		// Speedup 아이템 효과 적용
-		if (speedUpActive)
-		{
-			speedUpDuration--;
-			if (speedUpDuration <= 0)
-			{
-				speedUpActive = false;
-			}
-		}
+		CheckMbulletDuration();
+		CheckDoubleShot();
+		CheckSpeedupDuration();
 
 		SetColor(15, 10);
 		Player();
@@ -396,27 +486,96 @@ int main()
 		ItemMove();
 		Item();
 		SetColor(15, 0);
-		Itemshow();
 
 		Hit();
 
 		SetColor(15, 0);
 		Health();
 		Score();
-
-		if (health <= 0 || score >= 300)
-		{
-			printf("\n게임 오버! 엔터를 눌러 재시작.");
-			while (!_kbhit());  // 키 입력 대기
-			char key = _getch();
-			if (key == 13)  // 엔터 키 입력 시 게임 리셋
-			{
-				ResetGame();
-			}
-		}
+		BulletCountDisplay();
 
 		Sleep(75);
 	}
+}
+
+void ShowHelp()
+{
+	Clear();
+
+	GotoXY(0, 7);
+	printf("도움말");
+	GotoXY(0, 9);
+	printf("조작 : 방향키로 이동");
+	GotoXY(0, 10);
+	printf("발사 : 스페이스바");
+	GotoXY(0, 11);
+	printf("아이템은 습득 시 5초간 자동 사용");
+	GotoXY(0, 12);
+	printf("아이템 1: 최대 총알 증가");
+	GotoXY(0, 13);
+	printf("아이템 2: 총알 두 줄 발사");
+	GotoXY(0, 14);
+	printf("아이템 3: 이동 속도 증가");
+	GotoXY(0, 15);
+	printf("아이템 4: 목숨 1 증가");
+	GotoXY(0, 17);
+	printf("Esc 키를 눌러 메뉴로 돌아가기");
+
+	while (1)
+	{
+		if (_kbhit())
+		{
+			char key = _getch();
+			if (key == 27)  // Esc 키
+				return;  // 메뉴로 돌아가기
+		}
+	}
+}
+
+void ShowStartMenu()
+{
+	int choice = 0;
+
+	while (1)
+	{
+		Clear();
+		system("mode con cols=38 lines=30");
+
+
+		GotoXY(12, 7);
+		printf("게임 시작 화면");
+		GotoXY(12, 9);
+		printf("1. 게임 시작");
+		GotoXY(12, 10);
+		printf("2. 도움말");
+		GotoXY(12, 11);
+		printf("3. 게임 종료");
+
+		GotoXY(12, 13);
+		printf("선택 : ");
+		choice = _getch();  // 키 입력 받기
+
+		if (choice == '1')
+		{
+			break;  // 게임 시작
+		}
+		else if (choice == '2')
+		{
+			ShowHelp();  // 도움말 화면
+		}
+		else if (choice == '3')
+		{
+			exit(0);  // 게임 종료
+		}
+	}
+}
+
+#pragma endregion
+
+int main()
+{
+	ShowStartMenu();
+	GameStart();
 
 	return 0;
 }

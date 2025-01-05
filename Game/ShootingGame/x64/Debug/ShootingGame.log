@@ -1,6 +1,7 @@
 ﻿  2.c
-C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(63,18): warning C4133: '함수': 'char *'과(와) 'LPCWSTR' 사이의 형식이 호환되지 않습니다.
-C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(369,8): warning C4244: '함수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Source.c
-  코드를 생성하고 있습니다...
+C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(96,18): warning C4133: '함수': 'char *'과(와) 'LPCWSTR' 사이의 형식이 호환되지 않습니다.
+C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(388,26): warning C4244: '=': 'ULONGLONG'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(430,24): warning C4244: '=': 'ULONGLONG'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(465,8): warning C4244: '함수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Administrator\Desktop\ShootingGame\Game\ShootingGame\2.c(466,11): warning C4133: '함수': 'unsigned short [14]'과(와) 'char *' 사이의 형식이 호환되지 않습니다.
   ShootingGame.vcxproj -> C:\Users\Administrator\Desktop\ShootingGame\Game\x64\Debug\ShootingGame.exe
