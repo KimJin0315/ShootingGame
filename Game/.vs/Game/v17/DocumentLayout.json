@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\",
+  "WorkspaceRootPath": "C:\\Users\\admin\\Desktop\\ShootingGame\\Game\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|C:\\Users\\admin\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{44346F03-840B-4885-BDDB-465333C7BACC}|ShootingGame\\ShootingGame.vcxproj|solutionrelative:ShootingGame\\2.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "2.c",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c",
+              "DocumentMoniker": "C:\\Users\\admin\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c",
               "RelativeDocumentMoniker": "ShootingGame\\2.c",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c",
+              "ToolTip": "C:\\Users\\admin\\Desktop\\ShootingGame\\Game\\ShootingGame\\2.c",
               "RelativeToolTip": "ShootingGame\\2.c",
-              "ViewState": "AgIAAC4CAAAAAAAAAAAowEYBAAANAAAAAAAAAA==",
+              "ViewState": "AgIAABcCAAAAAAAAAAAAAB0CAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2025-01-04T12:37:18.827Z",
               "IsPinned": true,
